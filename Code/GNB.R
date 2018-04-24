@@ -65,7 +65,22 @@ master_preprocessing = function(data, key, test_ratio)
   return(list("train" = train, "test" = test, "key" = key))
 }
 
+#Separates records in the training dataset by class (label).
+#This takes an input of a training dataset and outputs a dictionary of records by class.
+class_sep = function(train, key) {
+  class_dict = vector(mode="list", length=length(key))
+  names(class_dict) = seq(1, length(key))
+  #print(class_dict)
+  
+  for (i in 1 : length(key)) {
+    class_dict[[i]] = train[train[, length(train)] == i, - length(train)]
+  }
+  
+  return (class_dict)
+}
+
 
 data = master_preprocessing(iris,key, 0.4)
 data
-
+sep_by_class = class_sep(data$train, data$key)
+sep_by_class
