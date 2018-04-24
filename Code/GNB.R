@@ -97,4 +97,5 @@ data = master_preprocessing(iris,key, 0.4)
 data
 
 sep_by_class = class_sep(data$train, data$key)
+sep_by_class
 
