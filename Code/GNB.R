@@ -83,13 +83,32 @@ gaussProb = function(mean,stddev,x)
 class_sep = function(train, key) {
   class_dict = vector(mode="list", length=length(key))
   names(class_dict) = seq(1, length(key))
-  #print(class_dict)
   
-  for (i in 1 : length(key)) {
-    class_dict[[i]] = train[train[, length(train)] == i, - length(train)]
-  }
+  for (i in 1 : length(key)) {class_dict[[i]] = train[train[, length(train)] == i, - length(train)]}
   
   return (class_dict)
+}
+
+#Creates a dictionary of the mean and standard deviation of every feature for each class.
+#This takes a dictionary of separated training data, and outputs a dictionary of summary statistics
+#(mean and stdev). For a dataset with three  classes and four features, there would be a total of
+#3x4 = 12 means and stdevs, separated by class.
+class_stats = function(train_class_dict) {
+  class_stats_dict = vector(mode="list", length=length(train_class_dict))
+  names(class_stats_dict) = seq(1, length(train_class_dict))
+  
+  for (i in 1 : length(train_class_dict)) {
+    #train_class_dict["mean"] 
+    for (name in names(train_class_dict[[i]])) {
+      # add two additional rows to each sub-list
+      train_class_dict[[i]]["mean", name] = mean(train_class_dict[[i]][, name], na.rm=T) # returns NA if not specify na.rm=T
+      train_class_dict[[i]]["sd", name] = sd(train_class_dict[[i]][, name], na.rm=T)
+    }
+    # assign the two additional rows to appropriate sub-list in `class_stats_dict`
+    class_stats_dict[[i]] = train_class_dict[[i]][c("mean", "sd"), ]
+  }
+  
+  return (class_stats_dict)
 }
 
 
@@ -99,3 +118,5 @@ data
 sep_by_class = class_sep(data$train, data$key)
 sep_by_class
 
+class_stats_dict = class_stats(sep_by_class)
+class_stats_dict
