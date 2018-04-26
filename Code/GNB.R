@@ -112,7 +112,7 @@ class_stats = function(train_class_dict) {
   return (class_stats_dict)
 }
 
-prob_by_class = function(data, class_stats)
+predict = function(data, class_stats)
 {
   #Remove result from test
   test = data$test[-c(length(data$test))]
@@ -185,7 +185,7 @@ sep_by_class
 class_stats_dict = class_stats(sep_by_class)
 class_stats_dict
 
-data = prob_by_class(data,class_stats_dict)
+data = predict(data,class_stats_dict)
 
 getAccuracy(data)
 
