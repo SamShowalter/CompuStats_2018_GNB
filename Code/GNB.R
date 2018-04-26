@@ -131,13 +131,9 @@ predict = function(data, class_stats)
       class_prob = 1
       
       #Get probability from each column
-      for (name in names(class_info[[class]]))
-      {
-        class_prob = class_prob * gaussProb(class_info[[class]]["mean",name],class_info[[class]]["sd",name], test[testrec, name])
-      }
+      for (name in names(class_info[[class]])){class_prob = class_prob * gaussProb(class_info[[class]]["mean",name],class_info[[class]]["sd",name], test[testrec, name])}
       
       result_row = c(result_row,class_prob)
-      
     }
     #print(result_row)
     probList = c(probList, result_row)
@@ -157,43 +153,82 @@ predict = function(data, class_stats)
   
   #Return data
   return(data)
-  
 }
 
 getAccuracy = function(data)
 {
   correct = 0
-  for (i in 1:length(data$preds))
-  {
-
-    if(data$preds[i] == data$test$class[i])
-    {
-      correct = correct + 1
-    }
-  }
+  for (i in 1:length(data$preds)){if (data$preds[i] == data$test$class[i]) {correct = correct + 1}}
   
   return(correct/length(data$preds))
 }
 
+get.individual.accuracy = function(data, labels, visualize=F) {
+  accuracies = c(rep(0, length(labels) + 1))
+  nlabels = c(rep(0, length(labels)))
+  
+  for (i in 1 : length(data$preds)) {
+    nlabels[data$test$class[i]] = nlabels[data$test$class[i]] + 1
+    
+    if (data$preds[i] == data$test$class[i]) {
+      accuracies[data$preds[i]] = accuracies[data$preds[i]] + 1
+      accuracies[length(labels) + 1] = accuracies[length(labels) + 1] + 1
+    }
+  }
+  
+  nlabels = c(nlabels, length(data$preds))
+  #print(accuracies)
+  #print(nlabels)
+  for (i in 1 : (length(labels) + 1)) {accuracies[i] = accuracies[i] / nlabels[i] * 100}
+  print(accuracies)
+  
+  if (visualize) {
+    xx = barplot(
+      accuracies,
+      main = "Model Accuracy Across Classes",
+      names.arg = c(labels, "Overall"),
+      col = "blue",
+      yaxis = "i", xaxis = "i",
+      axes = F
+    )
+    axis(2, at=seq(0, 100, 20), las=1)
+    segments(0, 0, 5, 0, xpd=T)
+    text(
+      x = xx,
+      y = accuracies,
+      label = paste(round(accuracies, 2), "%", sep=""),
+      pos = 3,
+      col = "red",
+      xpd = T
+    )
+    text(
+      x = 0, y = 110,
+      expression("Percent"),
+      xpd = T
+    )
+  }
+  
+  return (accuracies)
+}
+
 
 data = master_preprocessing(iris,key, 0.4)
-data
+#data
 
 sep_by_class = class_sep(data$train, data$key)
-sep_by_class
+#sep_by_class
 
 class_stats_dict = class_stats(sep_by_class)
-class_stats_dict
+#class_stats_dict
+#length(class_stats_dict)
+#print(names(class_stats_dict))
 
-data = predict(data,class_stats_dict)
+data = predict(data, class_stats_dict)
 
-getAccuracy(data)
-
-
-length(class_stats_dict)
 data$test$class
 data$preds
 data$probList
-#print(names(class_stats_dict))
 #print(class_stats_dict$`1`['mean','Sepal.Length'])
 
+#getAccuracy(data)
+accuracies = get.individual.accuracy(data, key, visualize=T)
