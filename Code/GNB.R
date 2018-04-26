@@ -133,7 +133,7 @@ predict = function(data, class_stats)
       #Get probability from each column
       for (name in names(class_info[[class]]))
       {
-        class_prob = class_prob * gaussProb(class_info[[class]]["mean",name],class_info[[class]]["mean",name], test[testrec, name])
+        class_prob = class_prob * gaussProb(class_info[[class]]["mean",name],class_info[[class]]["sd",name], test[testrec, name])
       }
       
       result_row = c(result_row,class_prob)
@@ -193,7 +193,7 @@ getAccuracy(data)
 length(class_stats_dict)
 data$test$class
 data$preds
-
+data$probList
 #print(names(class_stats_dict))
 #print(class_stats_dict$`1`['mean','Sepal.Length'])
 
