@@ -180,7 +180,7 @@ get.individual.accuracy = function(data, labels, visualize=F) {
   #print(accuracies)
   #print(nlabels)
   for (i in 1 : (length(labels) + 1)) {accuracies[i] = accuracies[i] / nlabels[i] * 100}
-  print(accuracies)
+  #print(accuracies)
   
   if (visualize) {
     xx = barplot(
@@ -211,19 +211,45 @@ get.individual.accuracy = function(data, labels, visualize=F) {
   return (accuracies)
 }
 
+MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
+{
+  final_results = c()
+  
+  for (iteration in 1:iter)
+  {
+    if(iteration %% (iter/10) == 0)
+    {
+      print(paste(iteration, "/",iter))
+    }
+    data = master_preprocessing(orig_data,key, test_ratio)
+    sep_by_class = class_sep(data$train, data$key)
+    class_stats_dict = class_stats(sep_by_class)
+    data = predict(data, class_stats_dict)
+    accuracies = get.individual.accuracy(data, key, visualize=F)
+    final_results = c(final_results, accuracies)
+  }
+  
+  #print(final_results)
+  accuracy_matrix = matrix(final_results,                # the data elements 
+                           nrow=iter,                    # number of rows 
+                           ncol=length(key) +1,     # number of columns plus one for overall
+                           byrow = TRUE)                 # fill matrix by rows 
+  
+  return(colMeans(accuracy_matrix, na.rm = FALSE, dims = 1))
+}
 
-data = master_preprocessing(iris,key, 0.4)
-#data
 
-sep_by_class = class_sep(data$train, data$key)
+
 #sep_by_class
 
-class_stats_dict = class_stats(sep_by_class)
+monte_carlo_perf = MonteCarloSim(iris,key,test_ratio = 0.9, iter = 500)
+
+monte_carlo_perf
 #class_stats_dict
 #length(class_stats_dict)
 #print(names(class_stats_dict))
 
-data = predict(data, class_stats_dict)
+
 
 data$test$class
 data$preds
@@ -231,4 +257,5 @@ data$probList
 #print(class_stats_dict$`1`['mean','Sepal.Length'])
 
 #getAccuracy(data)
-accuracies = get.individual.accuracy(data, key, visualize=T)
+
+
