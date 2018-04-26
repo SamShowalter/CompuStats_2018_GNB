@@ -100,6 +100,7 @@ class_stats = function(train_class_dict) {
   for (i in 1 : length(train_class_dict)) {
     #train_class_dict["mean"] 
     for (name in names(train_class_dict[[i]])) {
+      
       # add two additional rows to each sub-list
       train_class_dict[[i]]["mean", name] = mean(train_class_dict[[i]][, name], na.rm=T) # returns NA if not specify na.rm=T
       train_class_dict[[i]]["sd", name] = sd(train_class_dict[[i]][, name], na.rm=T)
@@ -111,6 +112,69 @@ class_stats = function(train_class_dict) {
   return (class_stats_dict)
 }
 
+prob_by_class = function(data, class_stats)
+{
+  #Remove result from test
+  test = data$test[-c(length(data$test))]
+
+  #Results list and probabilities
+  probList = c()
+  predictions = c()
+  
+  for (testrec in 1:nrow(test))
+  {
+    result_row = c()
+    for (class in names(class_stats))
+    {
+      #print(class)
+      class_info = class_stats_dict[class]
+      class_prob = 1
+      
+      #Get probability from each column
+      for (name in names(class_info[[class]]))
+      {
+        class_prob = class_prob * gaussProb(class_info[[class]]["mean",name],class_info[[class]]["mean",name], test[testrec, name])
+      }
+      
+      result_row = c(result_row,class_prob)
+      
+    }
+    #print(result_row)
+    probList = c(probList, result_row)
+    prediction = which.max(result_row)
+    
+    predictions = c(predictions, prediction)
+  }
+  
+  probList = matrix(probList,                     # the data elements 
+                    nrow=nrow(test),              # number of rows 
+                    ncol=length(class_stats),     # number of columns 
+                    byrow = TRUE)                 # fill matrix by rows 
+  
+  #Give dataframe probabilities and predictions
+  data$probList = probList
+  data$preds = predictions
+  
+  #Return data
+  return(data)
+  
+}
+
+getAccuracy = function(data)
+{
+  correct = 0
+  for (i in 1:length(data$preds))
+  {
+
+    if(data$preds[i] == data$test$class[i])
+    {
+      correct = correct + 1
+    }
+  }
+  
+  return(correct/length(data$preds))
+}
+
 
 data = master_preprocessing(iris,key, 0.4)
 data
@@ -120,3 +184,16 @@ sep_by_class
 
 class_stats_dict = class_stats(sep_by_class)
 class_stats_dict
+
+data = prob_by_class(data,class_stats_dict)
+
+getAccuracy(data)
+
+
+length(class_stats_dict)
+data$test$class
+data$preds
+
+#print(names(class_stats_dict))
+#print(class_stats_dict$`1`['mean','Sepal.Length'])
+
