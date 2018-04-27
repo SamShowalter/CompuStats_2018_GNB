@@ -239,16 +239,30 @@ MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
 }
 
 
+GNBtest = function(orig_data, key, test_ratio)
+{
+  data = master_preprocessing(orig_data,key, test_ratio)
+  sep_by_class = class_sep(data$train, data$key)
+  class_stats_dict = class_stats(sep_by_class)
+  data = predict(data, class_stats_dict)
+  acc_names = c(key,"Overall")
+  accuracies = get.individual.accuracy(data, key, visualize=T)
+  names(accuracies) = acc_names
+  data$accuracies = accuracies
+  
+  return(data)
+}
 
+data = GNBtest(iris, key,0.4)
+data
 #sep_by_class
 
-monte_carlo_perf = MonteCarloSim(iris,key,test_ratio = 0.9, iter = 500)
+monte_carlo_perf = MonteCarloSim(iris,key,test_ratio = 0.3, iter = 500)
 
 monte_carlo_perf
 #class_stats_dict
 #length(class_stats_dict)
 #print(names(class_stats_dict))
-
 
 
 data$test$class
