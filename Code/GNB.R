@@ -238,12 +238,14 @@ MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
   return(colMeans(accuracy_matrix, na.rm = FALSE, dims = 1))
 }
 
-
+orig_data = cancer
+orig_data
 GNBtest = function(orig_data, key, test_ratio)
 {
-  data = master_preprocessing(orig_data,key, test_ratio)
+  data = master_preprocessing(orig_data,key, 0.4)
   sep_by_class = class_sep(data$train, data$key)
   class_stats_dict = class_stats(sep_by_class)
+  class_stats_dict
   data = predict(data, class_stats_dict)
   acc_names = c(key,"Overall")
   accuracies = get.individual.accuracy(data, key, visualize=T)
@@ -253,11 +255,38 @@ GNBtest = function(orig_data, key, test_ratio)
   return(data)
 }
 
-data = GNBtest(iris, key,0.4)
+
+########################################################################
+#
+# Testing GNB with breast cancer data
+#
+#
+########################################################################
+
+
+key = c("Benign","Malignant")
+
+cancer = read.csv("/Users/Sam/Documents/Depauw/04_Senior_Year/Semester_2/CompuStats/CompuStats_2018_GNB/breast_cancer.txt",
+                  stringsAsFactors = T)
+cancer = data.frame(cancer, stringsAsFactors = F)
+cancer
+
+cancer$bare_nuclei = as.character(cancer$bare_nuclei)
+cancer$bare_nuclei[cancer$bare_nuclei == "?"] = "0"
+
+cancer$bare_nuclei = as.numeric(cancer$bare_nuclei)
+
+cancer = subset(cancer, select = -c(patient_id))
+cancer$class[cancer$class == 2] = "Benign"
+cancer$class[cancer$class == 4] = "Malignant"
+
+orig_data = cancer
+
+data = GNBtest(cancer, key,0.4)
 data
 #sep_by_class
 
-monte_carlo_perf = MonteCarloSim(iris,key,test_ratio = 0.3, iter = 500)
+monte_carlo_perf = MonteCarloSim(cancer,key,test_ratio = 0.4, iter = 50)
 
 monte_carlo_perf
 #class_stats_dict
@@ -265,9 +294,9 @@ monte_carlo_perf
 #print(names(class_stats_dict))
 
 
-data$test$class
-data$preds
-data$probList
+# data$test$class
+# data$preds
+# data$probList
 #print(class_stats_dict$`1`['mean','Sepal.Length'])
 
 #getAccuracy(data)
