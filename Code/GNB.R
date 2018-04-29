@@ -6,13 +6,8 @@
 # Kris Nguyen
 ###################################################
 
-#Import test data
-library(datasets)
-data("iris")
-
-
-#MUST PROVIDE OWN KEY
-key = c("virginica", "versicolor", "setosa")
+#clear initial directory
+rm(list = ls())
 
 #Split the data into train and test samples
 train_test_split = function(data, test_ratio)
@@ -127,7 +122,7 @@ predict = function(data, class_stats)
     for (class in names(class_stats))
     {
       #print(class)
-      class_info = class_stats_dict[class]
+      class_info = class_stats[class]
       class_prob = 1
       
       #Get probability from each column
@@ -238,22 +233,35 @@ MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
   return(colMeans(accuracy_matrix, na.rm = FALSE, dims = 1))
 }
 
-orig_data = cancer
-orig_data
-GNBtest = function(orig_data, key, test_ratio)
+
+GNBtest = function(orig_dataset, key, test_ratio)
 {
-  data = master_preprocessing(orig_data,key, 0.4)
+  data = master_preprocessing(orig_dataset,key, test_ratio)
   sep_by_class = class_sep(data$train, data$key)
-  class_stats_dict = class_stats(sep_by_class)
-  class_stats_dict
-  data = predict(data, class_stats_dict)
-  acc_names = c(key,"Overall")
+  class_stats_info = class_stats(sep_by_class)
+  data = predict(data, class_stats_info)
   accuracies = get.individual.accuracy(data, key, visualize=T)
   names(accuracies) = acc_names
   data$accuracies = accuracies
   
   return(data)
 }
+
+########################################################################
+#
+# Testing GNB with iris flower data
+#
+#
+########################################################################
+#Import test data
+library(datasets)
+data("iris")
+
+
+#MUST PROVIDE OWN KEY
+key = c("virginica", "versicolor", "setosa")
+
+GNBtest(iris,key,test_ratio = 0.4)
 
 
 ########################################################################
@@ -263,13 +271,11 @@ GNBtest = function(orig_data, key, test_ratio)
 #
 ########################################################################
 
-
 key = c("Benign","Malignant")
 
 cancer = read.csv("/Users/Sam/Documents/Depauw/04_Senior_Year/Semester_2/CompuStats/CompuStats_2018_GNB/breast_cancer.txt",
                   stringsAsFactors = T)
 cancer = data.frame(cancer, stringsAsFactors = F)
-cancer
 
 cancer$bare_nuclei = as.character(cancer$bare_nuclei)
 cancer$bare_nuclei[cancer$bare_nuclei == "?"] = "0"
@@ -280,10 +286,7 @@ cancer = subset(cancer, select = -c(patient_id))
 cancer$class[cancer$class == 2] = "Benign"
 cancer$class[cancer$class == 4] = "Malignant"
 
-orig_data = cancer
-
 data = GNBtest(cancer, key,0.4)
-data
 #sep_by_class
 
 monte_carlo_perf = MonteCarloSim(cancer,key,test_ratio = 0.4, iter = 50)
