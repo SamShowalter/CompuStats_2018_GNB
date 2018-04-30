@@ -206,7 +206,7 @@ get.individual.accuracy = function(data, labels, visualize=F) {
   return (accuracies)
 }
 
-MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
+MonteCarloSim = function(orig_data, key, test_ratio, iter = 100, viz = F)
 {
   final_results = c()
   
@@ -220,7 +220,7 @@ MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
     sep_by_class = class_sep(data$train, data$key)
     class_stats_dict = class_stats(sep_by_class)
     data = predict(data, class_stats_dict)
-    accuracies = get.individual.accuracy(data, key, visualize=F)
+    accuracies = get.individual.accuracy(data, key, visualize=viz)
     final_results = c(final_results, accuracies)
   }
   
@@ -236,7 +236,7 @@ MonteCarloSim = function(orig_data, key, test_ratio, iter = 100)
 
 GNBtest = function(orig_dataset, key, test_ratio)
 {
-  data = master_preprocessing(orig_dataset,key, test_ratio)
+  data = master_preprocessing(orig_dataset,key, 0.4)
   sep_by_class = class_sep(data$train, data$key)
   class_stats_info = class_stats(sep_by_class)
   data = predict(data, class_stats_info)
@@ -257,7 +257,7 @@ GNBtest = function(orig_dataset, key, test_ratio)
 library(datasets)
 data("iris")
 
-
+iris
 #MUST PROVIDE OWN KEY
 key = c("virginica", "versicolor", "setosa")
 
@@ -286,10 +286,11 @@ cancer = subset(cancer, select = -c(patient_id))
 cancer$class[cancer$class == 2] = "Benign"
 cancer$class[cancer$class == 4] = "Malignant"
 
+cancer
 data = GNBtest(cancer, key,0.4)
 #sep_by_class
 
-monte_carlo_perf = MonteCarloSim(cancer,key,test_ratio = 0.4, iter = 50)
+monte_carlo_perf = MonteCarloSim(cancer,key,test_ratio = 0.4, iter = 50, viz = T)
 
 monte_carlo_perf
 #class_stats_dict
