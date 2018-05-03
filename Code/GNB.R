@@ -251,58 +251,46 @@ GNBtest = function(orig_dataset, key, test_ratio)
 #
 # Testing GNB with iris flower data
 #
-#
 ########################################################################
 #Import test data
 library(datasets)
 data("iris")
 
-iris
 #MUST PROVIDE OWN KEY
 key = c("virginica", "versicolor", "setosa")
 
+#Run single test for iris data
 GNBtest(iris,key,test_ratio = 0.4)
-
 
 ########################################################################
 #
 # Testing GNB with breast cancer data
 #
-#
 ########################################################################
 
+#Create a key
 key = c("Benign","Malignant")
 
+#Undergo preprocessing for data
 cancer = read.csv("/Users/Sam/Documents/Depauw/04_Senior_Year/Semester_2/CompuStats/CompuStats_2018_GNB/breast_cancer.txt",
                   stringsAsFactors = T)
 cancer = data.frame(cancer, stringsAsFactors = F)
-
 cancer$bare_nuclei = as.character(cancer$bare_nuclei)
 cancer$bare_nuclei[cancer$bare_nuclei == "?"] = "0"
-
 cancer$bare_nuclei = as.numeric(cancer$bare_nuclei)
-
 cancer = subset(cancer, select = -c(patient_id))
 cancer$class[cancer$class == 2] = "Benign"
 cancer$class[cancer$class == 4] = "Malignant"
 
-cancer
+# View data if you want
+#cancer
+
+#Run single GNB test
 data = GNBtest(cancer, key,0.4)
-#sep_by_class
 
+#Run monte carlo simulation and view the results
 monte_carlo_perf = MonteCarloSim(cancer,key,test_ratio = 0.4, iter = 50, viz = T)
-
 monte_carlo_perf
-#class_stats_dict
-#length(class_stats_dict)
-#print(names(class_stats_dict))
 
-
-# data$test$class
-# data$preds
-# data$probList
-#print(class_stats_dict$`1`['mean','Sepal.Length'])
-
-#getAccuracy(data)
 
 
